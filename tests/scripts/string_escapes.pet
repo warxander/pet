@@ -1,0 +1,7 @@
+assert("\f" == str("\f"));
+assert("\n" == str("\n"));
+assert("\r" == str("\r"));
+assert("\t" == str("\t"));
+assert("\v" == str("\v"));
+assert("\"" == str("\""));
+assert("\\" == str("\\"));

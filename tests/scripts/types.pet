@@ -1,0 +1,37 @@
+var n;
+assert(type(n) == "null");
+assert(type(null) == "null");
+
+var b = true;
+assert(type(b) == "boolean");
+assert(type(true) == "boolean");
+assert(type(false) == "boolean");
+
+var f = 4.2;
+assert(type(f) == "float");
+assert(type(0.0) == "float");
+assert(type(1.0) == "float");
+assert(type(-6.4) == "float");
+
+var i = 7;
+assert(type(i) == "integer");
+assert(type(0) == "integer");
+assert(type(4) == "integer");
+assert(type(-9) == "integer");
+
+var s = "hello";
+assert(type(s) == "string");
+assert(type("") == "string");
+assert(type("world") == "string");
+
+var d = { };
+assert(type(d) == "dict");
+assert(type({ }) == "dict");
+
+var a = [ 1, 2 ];
+assert(type(a) == "array");
+assert(type([ ]) == "array");
+
+fun f1() { }
+assert(type(f1) == "function");
+assert(type(print) == "function");

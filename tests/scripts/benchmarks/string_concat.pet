@@ -1,0 +1,8 @@
+var i = 0;
+var s = "";
+var N = 200000;
+
+while (i < N) {
+	s = s + "x";
+	i = i + 1;
+}

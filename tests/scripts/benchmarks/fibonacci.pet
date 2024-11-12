@@ -1,0 +1,11 @@
+var a = 0;
+var b = 1;
+var i = 0;
+var N = 100000;
+
+while (i < N) {
+	var tmp = a + b;
+	a = b;
+	b = tmp;
+	i = i + 1;
+}

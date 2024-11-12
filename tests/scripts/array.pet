@@ -1,0 +1,11 @@
+var a1 = [ ];
+assert(len(a1) == 0);
+
+var a2 = [ 1, 2.4, false, "str", { }, [], null ];
+assert(len(a2) == 7);
+assert(a2[0] == 1);
+assert(a2[6] == null);
+
+a2[4].foo = "foo";
+assert(a2[4].foo == "foo");
+assert(len(a2[5]) == 0);

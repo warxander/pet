@@ -1,0 +1,11 @@
+var n1 = 4;
+var n2 = 3;
+n1 = n2;
+assert(n1 == 3);
+n2 = 5.4;
+assert(n1 == 3);
+assert(n2 == 5.4);
+n2 = n2;
+assert(n2 == 5.4);
+n2 = 6;
+assert(n2 == 6);

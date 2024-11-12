@@ -1,0 +1,18 @@
+var i = 0;
+var d = { };
+var N = 200000;
+
+while (i < N) {
+	var key = "k" + str(i);
+	d[key] = i;
+	i = i + 1;
+}
+
+var s = 0;
+i = 0;
+
+while (i < N) {
+	var key = "k" + str(i);
+	s = s + d[key];
+	i = i + 1;
+}

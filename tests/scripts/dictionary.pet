@@ -1,0 +1,22 @@
+var d = { };
+d.v1 = "foo";
+assert(d.v1 == "foo");
+assert(d.v2 == null);
+
+d.v1 = 4;
+assert(d.v1 == 4);
+
+d.f1 = fun(x) { return x + x; };
+assert(d.f1(4) == 8);
+
+var d1 = { };
+d1.d = d;
+d1.str = "foo";
+assert(d1.d.v1 == 4);
+assert(d1.str == "foo");
+
+d1.str = null;
+assert(d1.str == null);
+
+d.v1 = "bar";
+assert(d1.d.v1 == "bar");

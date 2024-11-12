@@ -1,0 +1,44 @@
+print();
+
+print("==========");
+print("You should see this line", "\nThis should be next line");
+print("==========");
+
+print("Current time:", now());
+print("Integer:", 42);
+print("Float:", 3.14);
+print("Boolean:", false);
+print("String:", "Hello World");
+print("Dictionary:", { });
+print("Function:", print);
+
+assert(int(true) == 1);
+assert(int(false) == 0);
+assert(int(-6) == -6);
+assert(int(5.2) == 5);
+assert(int("-678") == -678);
+
+assert(float(true) == 1.0);
+assert(float(false) == 0.0);
+assert(float(-4.2) == -4.2);
+assert(float(4) == 4.0);
+assert(float("-6.4") == -6.4);
+
+assert(str(null) == "null");
+assert(str(true) == "true");
+assert(str(false) == "false");
+assert(str(-4) == "-4");
+# assert(str(68.7) == "68.7"); # TODO:
+assert(str({ }) == "{ }");
+
+var d = { };
+d.foo = "bar";
+d.bar = 42;
+assert(str(d) == "{ bar: 42, foo: bar }");
+
+var a = [1, 2, 3];
+assert(len([]) == 0);
+assert(len(a) == 3);
+
+assert(len("") == 0);
+assert(len("foo") == 3);

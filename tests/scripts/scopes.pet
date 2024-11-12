@@ -1,0 +1,12 @@
+var f1 = 5;
+
+{
+	fun f1() {
+		var i = 4;
+	}
+}
+
+assert(f1 == 5);
+
+var i = 42;
+assert(i == 42);

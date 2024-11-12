@@ -1,0 +1,26 @@
+fun f1() { }
+
+fun f2() { return "str"; }
+
+fun f3(x, y) { return x + y; }
+
+fun f4(n) {
+	if (n == 1) return 1;
+	return n * f4(n - 1);
+}
+
+var f5 = fun(x, y) {
+	var f6 = fun(x, y) { return f3(x, y) + f4(x); };
+	return f6(x, y);
+};
+
+assert(f1() == null);
+
+var res = f2();
+assert(res == "str");
+
+res = f3(1, 2);
+assert(res == 3);
+
+assert(f4(5) == 120);
+assert(f5(5, 10) == 135);
