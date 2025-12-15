@@ -1,5 +1,7 @@
 #include <pet/parser/Parser.hpp>
 
+#include <pet/parser/ConstantFolder.hpp>
+
 #include <pet/Error.hpp>
 
 namespace pet
@@ -41,7 +43,7 @@ namespace pet
 		if (TryGetToken(TokenKind::Assign))
 			expression = ParseExpression();
 		else
-			expression = std::make_unique<LiteralExpression>(NullValue);
+			expression = std::make_unique<LiteralExpression>(Value());
 
 		PET_CHECK(TryGetToken(TokenKind::Semicolon), SyntaxError(_lexer.GetLocation(), "Expect ';' after variable declaration"));
 		return std::make_unique<VariableDeclarationStatement>(_context.GetIdentifierPool().Add(std::move(nameToken.Value)),
@@ -161,7 +163,12 @@ namespace pet
 		while (TryGetToken(TokenKind::Or))
 		{
 			auto right = ParseAnd();
-			result = std::make_unique<LogicalExpression>(std::move(result), TokenKind::Or, std::move(right));
+
+			auto foldedValue = ConstantFolder::FoldLogicalExpression(result, TokenKind::Or, right);
+			if (!foldedValue.IsNull())
+				result = std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				result = std::make_unique<LogicalExpression>(std::move(result), TokenKind::Or, std::move(right));
 		}
 
 		return result;
@@ -174,7 +181,12 @@ namespace pet
 		while (TryGetToken(TokenKind::And))
 		{
 			auto right = ParseEquality();
-			result = std::make_unique<LogicalExpression>(std::move(result), TokenKind::And, std::move(right));
+
+			auto foldedValue = ConstantFolder::FoldLogicalExpression(result, TokenKind::And, right);
+			if (!foldedValue.IsNull())
+				result = std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				result = std::make_unique<LogicalExpression>(std::move(result), TokenKind::And, std::move(right));
 		}
 
 		return result;
@@ -189,7 +201,12 @@ namespace pet
 		while (TryGetToken(token, equalityTokenKinds))
 		{
 			auto right = ParseComparison();
-			result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
+
+			auto foldedValue = ConstantFolder::FoldBinaryExpression(result, token.Kind, right);
+			if (!foldedValue.IsNull())
+				result = std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
 		}
 
 		return result;
@@ -205,7 +222,12 @@ namespace pet
 		while (TryGetToken(token, comparisonTokenKinds))
 		{
 			auto right = ParseTerm();
-			result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
+
+			auto foldedValue = ConstantFolder::FoldBinaryExpression(result, token.Kind, right);
+			if (!foldedValue.IsNull())
+				result = std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
 		}
 
 		return result;
@@ -220,7 +242,12 @@ namespace pet
 		while (TryGetToken(token, termTokenKinds))
 		{
 			auto right = ParseFactor();
-			result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
+
+			auto foldedValue = ConstantFolder::FoldBinaryExpression(result, token.Kind, right);
+			if (!foldedValue.IsNull())
+				result = std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
 		}
 
 		return result;
@@ -236,7 +263,12 @@ namespace pet
 		while (TryGetToken(token, factorTokenKinds))
 		{
 			auto right = ParseUnary();
-			result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
+
+			auto foldedValue = ConstantFolder::FoldBinaryExpression(result, token.Kind, right);
+			if (!foldedValue.IsNull())
+				result = std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				result = std::make_unique<BinaryExpression>(std::move(result), token.Kind, std::move(right));
 		}
 
 		return result;
@@ -250,7 +282,12 @@ namespace pet
 		if (TryGetToken(token, unaryTokenKinds))
 		{
 			auto right = ParseUnary();
-			return std::make_unique<UnaryExpression>(token.Kind, std::move(right));
+
+			auto foldedValue = ConstantFolder::FoldUnaryExpression(right, token.Kind);
+			if (!foldedValue.IsNull())
+				return std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				return std::make_unique<UnaryExpression>(token.Kind, std::move(right));
 		}
 
 		return ParseCall();
@@ -279,8 +316,8 @@ namespace pet
 				auto nameToken = _lexer.GetToken();
 				PET_CHECK(nameToken.Kind == TokenKind::Identifier, SyntaxError(_lexer.GetLocation(), "Expect property name after '.'"));
 
-				result = std::make_unique<MemberExpression>(
-					std::move(result), std::make_unique<LiteralExpression>(std::make_shared<Value>(std::move(nameToken.Value))));
+				result = std::make_unique<MemberExpression>(std::move(result),
+															std::make_unique<LiteralExpression>(Value(std::move(nameToken.Value))));
 			}
 			else if (TryGetToken(TokenKind::LeftBracket))
 			{
@@ -302,20 +339,25 @@ namespace pet
 		Token token;
 
 		if (TryGetToken(token, TokenKind::False))
-			return std::make_unique<LiteralExpression>(FalseValue);
+			return std::make_unique<LiteralExpression>(Value(false));
 
 		if (TryGetToken(token, TokenKind::True))
-			return std::make_unique<LiteralExpression>(TrueValue);
+			return std::make_unique<LiteralExpression>(Value(true));
 
 		if (TryGetToken(token, TokenKind::Null))
-			return std::make_unique<LiteralExpression>(NullValue);
+			return std::make_unique<LiteralExpression>(Value());
 
 		if (TryGetToken(TokenKind::LeftParenthesis))
 		{
 			auto expression = ParseExpression();
 			token = _lexer.GetToken();
 			PET_CHECK(token.Kind == TokenKind::RightParenthesis, SyntaxError(_lexer.GetLocation(), "Expect ')' after expression"));
-			return std::make_unique<GroupingExpression>(std::move(expression));
+
+			auto foldedValue = ConstantFolder::FoldGroupingExpression(expression);
+			if (!foldedValue.IsNull())
+				return std::make_unique<LiteralExpression>(std::move(foldedValue));
+			else
+				return std::make_unique<GroupingExpression>(std::move(expression));
 		}
 
 		if (TryGetToken(TokenKind::LeftBrace))
@@ -339,17 +381,13 @@ namespace pet
 		}
 
 		if (TryGetToken(token, TokenKind::Integer))
-		{
-			const auto value = std::stoll(token.Value);
-			return std::make_unique<LiteralExpression>(!value ? ZeroValue : value == 1 ? OneValue : std::make_shared<Value>(value));
-		}
+			return std::make_unique<LiteralExpression>(Value(std::stoll(token.Value)));
 
 		if (TryGetToken(token, TokenKind::Number))
-			return std::make_unique<LiteralExpression>(std::make_shared<Value>(std::stod(token.Value)));
+			return std::make_unique<LiteralExpression>(Value(std::stod(token.Value)));
 
 		if (TryGetToken(token, TokenKind::String))
-			return std::make_unique<LiteralExpression>(token.Value.empty() ? EmptyStringValue
-																		   : std::make_shared<Value>(std::move(token.Value)));
+			return std::make_unique<LiteralExpression>(Value(std::move(token.Value)));
 
 		if (TryGetToken(token, TokenKind::Identifier))
 			return std::make_unique<IdentifierExpression>(_context.GetIdentifierPool().Add(std::move(token.Value)));

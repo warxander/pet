@@ -133,9 +133,9 @@ namespace pet
 
 	struct LiteralExpression final : public ExpressionBase<ExpressionKind::Literal>
 	{
-		ValuePtr Value;
+		pet::Value Value;
 
-		explicit LiteralExpression(const ValuePtr& value) : Value(value)
+		explicit LiteralExpression(pet::Value&& value) : Value(std::move(value))
 		{
 		}
 

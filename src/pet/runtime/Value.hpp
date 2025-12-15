@@ -119,5 +119,4 @@ namespace pet
 	inline const auto FalseValue = std::make_shared<Value>(false);
 	inline const auto ZeroValue = std::make_shared<Value>(0);
 	inline const auto OneValue = std::make_shared<Value>(1);
-	inline const auto EmptyStringValue = std::make_shared<Value>(std::string());
 }

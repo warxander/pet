@@ -238,7 +238,7 @@ namespace pet
 
 	void Interpreter::VisitLiteral(LiteralExpression& expression)
 	{
-		_evaluationResult = expression.Value;
+		_evaluationResult = std::make_shared<Value>(std::move(expression.Value));
 	}
 
 	void Interpreter::VisitDictionary(DictionaryExpression&)

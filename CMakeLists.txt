@@ -19,6 +19,7 @@ add_library(pet-lib STATIC
 	src/toolkit/StringPool.cpp
 	src/toolkit/StringUtils.cpp
 
+	src/pet/parser/ConstantFolder.cpp
 	src/pet/parser/Lexer.cpp
 	src/pet/parser/Parser.cpp
 	src/pet/parser/Token.cpp
