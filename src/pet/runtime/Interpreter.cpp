@@ -13,6 +13,29 @@
 
 namespace pet
 {
+	namespace
+	{
+		template <typename T, typename... Args>
+		static std::shared_ptr<Value> MakeHeapValue(Args&&... args)
+		{
+			struct ValueHolder
+			{
+				T	  data;
+				Value value;
+
+				explicit ValueHolder(Args&&... args) : data(std::forward<Args>(args)...), value()
+				{
+				}
+			};
+
+			const auto				 valueHolder = std::make_shared<ValueHolder>(std::forward<Args>(args)...);
+			const std::shared_ptr<T> dataPtr(valueHolder, &valueHolder->data);
+			valueHolder->value = Value(dataPtr);
+
+			return std::shared_ptr<Value>(valueHolder, &valueHolder->value);
+		}
+	}
+
 	void Interpreter::Execute(const StatementUniqPtr& statement)
 	{
 		statement->Visit(*this);
@@ -220,7 +243,7 @@ namespace pet
 
 	void Interpreter::VisitDictionary(DictionaryExpression&)
 	{
-		_evaluationResult = std::make_shared<Value>(std::make_shared<Dictionary>());
+		_evaluationResult = MakeHeapValue<Dictionary>();
 	}
 
 	void Interpreter::VisitArray(ArrayExpression& expression)
@@ -230,7 +253,7 @@ namespace pet
 
 		for (const auto& value : expression.Values) values.emplace_back(Evaluate(value));
 
-		_evaluationResult = std::make_shared<Value>(std::make_shared<Array>(std::move(values)));
+		_evaluationResult = MakeHeapValue<Array>(std::move(values));
 	}
 
 	void Interpreter::VisitMember(MemberExpression& expression)
@@ -244,8 +267,8 @@ namespace pet
 
 	void Interpreter::VisitFunction(FunctionExpression& expression)
 	{
-		_evaluationResult = std::make_shared<Value>(std::make_shared<ScriptFunction>(
-			_scope, _context.GetIdentifierPool().Add(""), std::move(expression.Parameters), std::move(expression.Body)));
+		_evaluationResult = MakeHeapValue<ScriptFunction>(_scope, _context.GetIdentifierPool().Add(""), std::move(expression.Parameters),
+														  std::move(expression.Body));
 	}
 
 	void Interpreter::VisitIdentifier(IdentifierExpression& expression)
@@ -377,8 +400,8 @@ namespace pet
 		PET_CHECK(!_scope->HasValue(statement.Id),
 				  RuntimeError(StringBuilder() % "Function '" % statement.Id % "' is already declared in this scope"));
 
-		_scope->SetValue(statement.Id, std::make_shared<Value>(std::make_shared<ScriptFunction>(
-										   _scope, statement.Id, std::move(statement.Parameters), std::move(statement.Body))));
+		_scope->SetValue(statement.Id,
+						 MakeHeapValue<ScriptFunction>(_scope, statement.Id, std::move(statement.Parameters), std::move(statement.Body)));
 
 		_statementResult = StatementResult::Empty();
 	}
