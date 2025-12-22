@@ -1,8 +1,8 @@
 #pragma once
 
+#include <deque>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 namespace pet
 {
@@ -12,7 +12,7 @@ namespace pet
 	{
 	private:
 		std::unordered_map<std::string, StringPoolId> _stringToIds;
-		std::vector<std::string>					  _strings;
+		std::deque<std::string>						  _strings;
 
 	public:
 		StringPoolId	 Add(std::string&& str);
