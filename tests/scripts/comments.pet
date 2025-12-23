@@ -1,5 +1,5 @@
 #######
 # var i = 4
-var i = 2;
+const i = 2;
 assert(i == 2); # Ignored
 #######

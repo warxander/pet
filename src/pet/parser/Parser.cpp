@@ -17,23 +17,35 @@ namespace pet
 
 	StatementUniqPtr Parser::ParseStatement()
 	{
-		if (TryGetToken(TokenKind::Var))
-			return ParseVariableDeclarationStatement();
-		else if (TryGetToken(TokenKind::Fun))
+		const auto tokenKind = _lexer.PeekToken().Kind;
+
+		switch (tokenKind)
+		{
+		case TokenKind::Var:
+		case TokenKind::Const:
+			_lexer.GetToken();
+			return ParseVariableDeclarationStatement(tokenKind == TokenKind::Const);
+		case TokenKind::Fun:
+			_lexer.GetToken();
 			return ParseFunctionDeclarationStatement();
-		else if (TryGetToken(TokenKind::If))
+		case TokenKind::If:
+			_lexer.GetToken();
 			return ParseIfStatement();
-		else if (TryGetToken(TokenKind::While))
+		case TokenKind::While:
+			_lexer.GetToken();
 			return ParseWhileStatement();
-		else if (TryGetToken(TokenKind::Break))
+		case TokenKind::Break:
+			_lexer.GetToken();
 			return ParseBreakStatement();
-		else if (TryGetToken(TokenKind::Return))
+		case TokenKind::Return:
+			_lexer.GetToken();
 			return ParseReturnStatement();
-		else
+		default:
 			return ParseExpressionStatement();
+		}
 	}
 
-	StatementUniqPtr Parser::ParseVariableDeclarationStatement()
+	StatementUniqPtr Parser::ParseVariableDeclarationStatement(bool isConst)
 	{
 		auto nameToken = _lexer.GetToken();
 		PET_CHECK(nameToken.Kind == TokenKind::Identifier, SyntaxError(_lexer.GetLocation(), "Expect variable name"));
@@ -43,11 +55,14 @@ namespace pet
 		if (TryGetToken(TokenKind::Assign))
 			expression = ParseExpression();
 		else
+		{
+			PET_CHECK(!isConst, SyntaxError(_lexer.GetLocation(), StringBuilder() % "Const variable must be initialized in declaration"));
 			expression = std::make_unique<LiteralExpression>(Value());
+		}
 
 		PET_CHECK(TryGetToken(TokenKind::Semicolon), SyntaxError(_lexer.GetLocation(), "Expect ';' after variable declaration"));
 		return std::make_unique<VariableDeclarationStatement>(_context.GetIdentifierPool().Add(std::move(nameToken.Value)),
-															  std::move(expression));
+															  std::move(expression), isConst);
 	}
 
 	StatementUniqPtr Parser::ParseFunctionDeclarationStatement()

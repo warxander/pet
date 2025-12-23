@@ -15,10 +15,20 @@ namespace pet
 	{
 		PET_NON_COPYABLE(Scope);
 
+		struct ValueEntry
+		{
+			ValuePtr Value;
+			bool	 IsConst;
+
+			ValueEntry(const ValuePtr& value, bool isConst) : Value(value), IsConst(isConst)
+			{
+			}
+		};
+
 	private:
 		ScopePtr _parent;
 
-		std::unordered_map<StringPoolId, ValuePtr> _values;
+		std::unordered_map<StringPoolId, ValueEntry> _values;
 
 	public:
 		explicit Scope(const ScopePtr& parent = nullptr) : _parent(parent)
@@ -30,20 +40,24 @@ namespace pet
 			return _parent;
 		}
 
-		bool HasValue(StringPoolId id) const
+		bool Has(StringPoolId id) const
 		{
 			return _values.find(id) != _values.end();
 		}
 
-		void SetValue(StringPoolId id, const ValuePtr& value)
-		{
-			_values.insert_or_assign(id, value);
-		}
-
-		ValuePtr TryGetValue(StringPoolId id) const
+		bool IsConst(StringPoolId id) const
 		{
 			const auto it = _values.find(id);
-			return it == _values.end() ? nullptr : it->second;
+			return it != _values.end() && it->second.IsConst;
+		}
+
+		void Declare(StringPoolId id, const ValuePtr& value, bool isConst);
+		void Assign(StringPoolId id, const ValuePtr& value);
+
+		ValuePtr TryGet(StringPoolId id) const
+		{
+			const auto it = _values.find(id);
+			return it == _values.end() ? nullptr : it->second.Value;
 		}
 	};
 }

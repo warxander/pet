@@ -30,7 +30,7 @@ namespace pet
 
 	private:
 		StatementUniqPtr ParseStatement();
-		StatementUniqPtr ParseVariableDeclarationStatement();
+		StatementUniqPtr ParseVariableDeclarationStatement(bool isConst);
 		StatementUniqPtr ParseFunctionDeclarationStatement();
 		StatementUniqPtr ParseIfStatement();
 		StatementUniqPtr ParseWhileStatement();

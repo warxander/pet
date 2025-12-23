@@ -15,7 +15,8 @@ namespace pet
 			static const std::unordered_map<std::string_view, TokenKind> KeywordsToTokenKinds = {
 				{"and", TokenKind::And},	   {"break", TokenKind::Break}, {"else", TokenKind::Else}, {"if", TokenKind::If},
 				{"false", TokenKind::False},   {"fun", TokenKind::Fun},		{"null", TokenKind::Null}, {"or", TokenKind::Or},
-				{"return", TokenKind::Return}, {"true", TokenKind::True},	{"var", TokenKind::Var},   {"while", TokenKind::While}};
+				{"return", TokenKind::Return}, {"true", TokenKind::True},	{"var", TokenKind::Var},   {"while", TokenKind::While},
+				{"const", TokenKind::Const}};
 
 			const auto it = KeywordsToTokenKinds.find(keyword);
 			return it != KeywordsToTokenKinds.end() ? it->second : defaultType;

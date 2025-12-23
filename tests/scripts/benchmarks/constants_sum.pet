@@ -1,4 +1,4 @@
-var N = 10000000;
+const N = 10000000;
 var i = 0;
 var s = 0;
 

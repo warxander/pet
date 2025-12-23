@@ -13,5 +13,5 @@ assert(true or (1 / 0) == true);
 
 assert(((2 + 2) * (3 + 1)) + (5 - 1) == 20);
 
-var f = fun() { return 1; };
+const f = fun() { return 1; };
 assert(!(true and f() == 1) or true);

@@ -31,12 +31,12 @@ assert(str(-4) == "-4");
 # assert(str(68.7) == "68.7"); # TODO:
 assert(str({ }) == "{ }");
 
-var d = { };
+const d = { };
 d.foo = "bar";
 d.bar = 42;
 assert(str(d) == "{ bar: 42, foo: bar }");
 
-var a = [1, 2, 3];
+const a = [1, 2, 3];
 assert(len([]) == 0);
 assert(len(a) == 3);
 

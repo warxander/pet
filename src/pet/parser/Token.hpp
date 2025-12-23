@@ -42,6 +42,7 @@ namespace pet
 		// Keywords
 		And,
 		Break,
+		Const,
 		Else,
 		If,
 		False,

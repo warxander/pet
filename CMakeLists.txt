@@ -29,6 +29,7 @@ add_library(pet-lib STATIC
 
 	src/pet/runtime/Array.cpp
 	src/pet/runtime/Dictionary.cpp
+	src/pet/runtime/Scope.cpp
 	src/pet/runtime/Value.cpp
 	
 	src/pet/Expression.cpp

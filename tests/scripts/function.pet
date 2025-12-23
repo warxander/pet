@@ -9,7 +9,7 @@ fun f4(n) {
 	return n * f4(n - 1);
 }
 
-var f5 = fun(x, y) {
+const f5 = fun(x, y) {
 	var f6 = fun(x, y) { return f3(x, y) + f4(x); };
 	return f6(x, y);
 };

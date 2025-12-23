@@ -277,7 +277,7 @@ namespace pet
 
 		while (scope)
 		{
-			if (const auto value = scope->TryGetValue(expression.Id))
+			if (const auto value = scope->TryGet(expression.Id))
 			{
 				_evaluationResult = value;
 				return;
@@ -287,7 +287,8 @@ namespace pet
 		}
 
 		const auto it = _globals.find(expression.Id);
-		PET_CHECK(it != _globals.end(), RuntimeError(StringBuilder() % "'" % expression.Id % "' is not defined"));
+		PET_CHECK(it != _globals.end(),
+				  RuntimeError(StringBuilder() % "'" % _context.GetIdentifierPool().Get(expression.Id) % "' is not defined"));
 
 		_evaluationResult = it->second;
 	}
@@ -313,14 +314,19 @@ namespace pet
 
 			while (scope)
 			{
-				if (scope->HasValue(identifierExpression->Id))
+				if (scope->Has(identifierExpression->Id))
 					break;
 
 				scope = scope->GetParent();
 			}
 
-			PET_CHECK(scope, RuntimeError(StringBuilder() % "'" % identifierExpression->Id % "' is not defined"));
-			scope->SetValue(identifierExpression->Id, Evaluate(expression.Value));
+			PET_CHECK(scope, RuntimeError(StringBuilder() % "'" % _context.GetIdentifierPool().Get(identifierExpression->Id) %
+										  "' is not defined"));
+			PET_CHECK(!scope->IsConst(identifierExpression->Id),
+					  RuntimeError(StringBuilder() % "Cannot assign to constant variable '" %
+								   _context.GetIdentifierPool().Get(identifierExpression->Id) % "'"));
+
+			scope->Assign(identifierExpression->Id, Evaluate(expression.Value));
 		}
 	}
 
@@ -388,20 +394,21 @@ namespace pet
 
 	void Interpreter::VisitVariableDeclaration(VariableDeclarationStatement& statement)
 	{
-		PET_CHECK(!_scope->HasValue(statement.Id),
-				  RuntimeError(StringBuilder() % "Variable " % statement.Id % " is already declared in this scope"));
+		PET_CHECK(!_scope->Has(statement.Id), RuntimeError(StringBuilder() % "Variable " % _context.GetIdentifierPool().Get(statement.Id) %
+														   " is already declared in this scope"));
 
-		_scope->SetValue(statement.Id, statement.Value ? Evaluate(statement.Value) : NullValue);
+		_scope->Declare(statement.Id, statement.Value ? Evaluate(statement.Value) : NullValue, statement.IsConst);
 		_statementResult = StatementResult::Empty();
 	}
 
 	void Interpreter::VisitFunctionDeclaration(FunctionDeclarationStatement& statement)
 	{
-		PET_CHECK(!_scope->HasValue(statement.Id),
-				  RuntimeError(StringBuilder() % "Function '" % statement.Id % "' is already declared in this scope"));
+		PET_CHECK(!_scope->Has(statement.Id), RuntimeError(StringBuilder() % "Function '" % _context.GetIdentifierPool().Get(statement.Id) %
+														   "' is already declared in this scope"));
 
-		_scope->SetValue(statement.Id,
-						 MakeHeapValue<ScriptFunction>(_scope, statement.Id, std::move(statement.Parameters), std::move(statement.Body)));
+		_scope->Declare(statement.Id,
+						MakeHeapValue<ScriptFunction>(_scope, statement.Id, std::move(statement.Parameters), std::move(statement.Body)),
+						false);
 
 		_statementResult = StatementResult::Empty();
 	}
@@ -462,7 +469,7 @@ namespace pet
 	{
 		const auto scope = std::make_shared<Scope>(function.Closure);
 
-		for (size_t i = 0; i < function.Parameters.size(); ++i) scope->SetValue(function.Parameters[i], arguments[i]);
+		for (size_t i = 0; i < function.Parameters.size(); ++i) scope->Declare(function.Parameters[i], arguments[i], false);
 
 		ExecuteBlock(function.Body, scope);
 		return _statementResult.Kind == StatementResult::Kind::Return ? _statementResult.Value : NullValue;

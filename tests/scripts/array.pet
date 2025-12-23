@@ -1,7 +1,7 @@
-var a1 = [ ];
+const a1 = [ ];
 assert(len(a1) == 0);
 
-var a2 = [ 1, 2.4, false, "str", { }, [], null ];
+const a2 = [ 1, 2.4, false, "str", { }, [], null ];
 assert(len(a2) == 7);
 assert(a2[0] == 1);
 assert(a2[6] == null);

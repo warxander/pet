@@ -6,7 +6,7 @@ namespace pet
 {
 	std::string VariableDeclarationStatement::ToString() const
 	{
-		return StringBuilder() % "{ kind: " % GetKind() % ", id: " % Id % ", value: " % Value % " }";
+		return StringBuilder() % "{ kind: " % GetKind() % ", id: " % Id % ", value: " % Value % ", isConst: " % IsConst % " }";
 	}
 
 	std::string FunctionDeclarationStatement::ToString() const

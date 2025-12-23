@@ -10,3 +10,10 @@ assert(f1 == 5);
 
 var i = 42;
 assert(i == 42);
+
+const i1 = 1;
+{
+	var i1 = 2;
+	assert(i1 == 2);
+}
+assert(i1 == 1);

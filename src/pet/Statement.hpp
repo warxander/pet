@@ -64,8 +64,10 @@ namespace pet
 	{
 		StringPoolId	  Id;
 		ExpressionUniqPtr Value;
+		bool			  IsConst;
 
-		VariableDeclarationStatement(StringPoolId id, ExpressionUniqPtr&& expression) : Id(id), Value(std::move(expression))
+		VariableDeclarationStatement(StringPoolId id, ExpressionUniqPtr&& expression, bool isConst)
+			: Id(id), Value(std::move(expression)), IsConst(isConst)
 		{
 		}
 
