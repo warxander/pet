@@ -15,8 +15,9 @@ namespace pet
 		{
 			enum class Kind
 			{
-				Empty,
 				Break,
+				Continue,
+				Empty,
 				Return
 			} Kind;
 			ValuePtr Value;
@@ -35,6 +36,11 @@ namespace pet
 			{
 				return {Kind::Return, value};
 			}
+
+			static StatementResult Continue()
+			{
+				return {Kind::Continue, NullValue};
+			}
 		};
 
 	private:
@@ -46,9 +52,12 @@ namespace pet
 		ValuePtr		_evaluationResult;
 		StatementResult _statementResult;
 
+		size_t _loopDepth;
+		size_t _functionDepth;
+
 	public:
 		Interpreter(Context& context, Globals&& globals)
-			: _context(context), _globals(std::move(globals)), _scope(std::make_shared<Scope>())
+			: _context(context), _globals(std::move(globals)), _scope(std::make_shared<Scope>()), _loopDepth(0), _functionDepth(0)
 		{
 		}
 
@@ -76,6 +85,7 @@ namespace pet
 		void VisitWhile(WhileStatement& statement) override;
 		void VisitBreak(BreakStatement& statement) override;
 		void VisitReturn(ReturnStatement& statement) override;
+		void VisitContinue(ContinueStatement& statement) override;
 
 		ValuePtr InvokeScriptFunction(ScriptFunction& function, const std::vector<ValuePtr>& arguments) override;
 

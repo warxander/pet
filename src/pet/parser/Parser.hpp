@@ -36,6 +36,7 @@ namespace pet
 		StatementUniqPtr ParseWhileStatement();
 		StatementUniqPtr ParseBreakStatement();
 		StatementUniqPtr ParseReturnStatement();
+		StatementUniqPtr ParseContinueStatement();
 		StatementUniqPtr ParseExpressionStatement();
 
 		std::vector<StatementUniqPtr> ParseBlock();

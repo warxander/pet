@@ -63,4 +63,9 @@ namespace pet
 	{
 		return StringBuilder() % "{ kind: " % GetKind() % ", value: " % Value % " }";
 	}
+
+	std::string ContinueStatement::ToString() const
+	{
+		return StringBuilder() % "{ kind: " % GetKind() % " }";
+	}
 }

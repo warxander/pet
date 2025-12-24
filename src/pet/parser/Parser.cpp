@@ -40,6 +40,9 @@ namespace pet
 		case TokenKind::Return:
 			_lexer.GetToken();
 			return ParseReturnStatement();
+		case TokenKind::Continue:
+			_lexer.GetToken();
+			return ParseContinueStatement();
 		default:
 			return ParseExpressionStatement();
 		}
@@ -128,6 +131,12 @@ namespace pet
 		PET_CHECK(TryGetToken(TokenKind::Semicolon), SyntaxError(_lexer.GetLocation(), "Expect ';' after 'return'"));
 
 		return std::make_unique<ReturnStatement>(std::move(result));
+	}
+
+	StatementUniqPtr Parser::ParseContinueStatement()
+	{
+		PET_CHECK(TryGetToken(TokenKind::Semicolon), SyntaxError(_lexer.GetLocation(), "Expect ';' after 'continue'"));
+		return std::make_unique<ContinueStatement>();
 	}
 
 	StatementUniqPtr Parser::ParseExpressionStatement()

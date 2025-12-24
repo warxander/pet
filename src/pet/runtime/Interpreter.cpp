@@ -439,6 +439,15 @@ namespace pet
 
 	void Interpreter::VisitWhile(WhileStatement& statement)
 	{
+		++_loopDepth;
+
+		const ScopedInvoker si(
+			[&]()
+			{
+				PET_CHECK(_loopDepth > 0, LogicException());
+				--_loopDepth;
+			});
+
 		while (true)
 		{
 			const auto condition = Evaluate(statement.Condition);
@@ -457,12 +466,20 @@ namespace pet
 
 	void Interpreter::VisitBreak(BreakStatement&)
 	{
+		PET_CHECK(_loopDepth > 0, RuntimeError("Unexpected 'break' statement outside of loop"));
 		_statementResult = StatementResult::Break();
 	}
 
 	void Interpreter::VisitReturn(ReturnStatement& statement)
 	{
+		PET_CHECK(_functionDepth > 0, RuntimeError("Unexpected 'return' statement outside of function"));
 		_statementResult = StatementResult::Return(statement.Value ? Evaluate(statement.Value) : NullValue);
+	}
+
+	void Interpreter::VisitContinue(ContinueStatement&)
+	{
+		PET_CHECK(_loopDepth > 0, RuntimeError("Unexpected 'continue' statement outside of loop"));
+		_statementResult = StatementResult::Continue();
 	}
 
 	ValuePtr Interpreter::InvokeScriptFunction(ScriptFunction& function, const std::vector<ValuePtr>& arguments)
@@ -470,6 +487,15 @@ namespace pet
 		const auto scope = std::make_shared<Scope>(function.Closure);
 
 		for (size_t i = 0; i < function.Parameters.size(); ++i) scope->Declare(function.Parameters[i], arguments[i], false);
+
+		++_functionDepth;
+
+		const ScopedInvoker si(
+			[&]()
+			{
+				PET_CHECK(_functionDepth > 0, LogicException());
+				--_functionDepth;
+			});
 
 		ExecuteBlock(function.Body, scope);
 		return _statementResult.Kind == StatementResult::Kind::Return ? _statementResult.Value : NullValue;
@@ -492,7 +518,7 @@ namespace pet
 		for (const auto& statement : statements)
 		{
 			Execute(statement);
-			if (_statementResult.Kind == StatementResult::Kind::Break || _statementResult.Kind == StatementResult::Kind::Return)
+			if (_statementResult.Kind != StatementResult::Kind::Empty)
 				return;
 		}
 

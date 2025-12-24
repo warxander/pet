@@ -43,6 +43,7 @@ namespace pet
 		And,
 		Break,
 		Const,
+		Continue,
 		Else,
 		If,
 		False,

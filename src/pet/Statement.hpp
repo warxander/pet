@@ -12,6 +12,7 @@ namespace pet
 	struct WhileStatement;
 	struct BreakStatement;
 	struct ReturnStatement;
+	struct ContinueStatement;
 
 	enum class StatementKind
 	{
@@ -22,7 +23,8 @@ namespace pet
 		If,
 		While,
 		Break,
-		Return
+		Return,
+		Continue
 	};
 
 	struct StatementVisitor
@@ -37,6 +39,7 @@ namespace pet
 		virtual void VisitWhile(WhileStatement& statement) = 0;
 		virtual void VisitBreak(BreakStatement& statement) = 0;
 		virtual void VisitReturn(ReturnStatement& statement) = 0;
+		virtual void VisitContinue(ContinueStatement& statement) = 0;
 	};
 
 	struct Statement
@@ -187,6 +190,16 @@ namespace pet
 		void Visit(StatementVisitor& visitor) override
 		{
 			visitor.VisitReturn(*this);
+		}
+
+		std::string ToString() const override;
+	};
+
+	struct ContinueStatement final : public StatementBase<StatementKind::Continue>
+	{
+		void Visit(StatementVisitor& visitor) override
+		{
+			visitor.VisitContinue(*this);
 		}
 
 		std::string ToString() const override;
